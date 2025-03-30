@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instaspot - Add Cmd+K/Ctrl+K Spotlight Search (Live Demo!)</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #6366F1; /* Indigo */
+            --primary-hover: #4F46E5;
+            --text-dark: #1F2937; /* Dark Gray */
+            --text-medium: #4B5563; /* Medium Gray */
+            --text-light: #6B7280; /* Light Gray */
+            --bg-light: #F9FAFB; /* Very Light Gray */
+            --bg-white: #FFFFFF;
+            --border-color: #E5E7EB; /* Light Border */
+        }
+
+        /* --- Base Page Styles (Keep all previous styles) --- */
+        body { font-family: 'Inter', sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: var(--bg-white); color: var(--text-medium); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .section { padding: 60px 20px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 15px; }
+        .hero { background-color: var(--bg-light); text-align: center; padding: 80px 20px 80px 20px; }
+        .hero h1 { font-size: 3em; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; line-height: 1.2; }
+        .hero p.subtitle { font-size: 1.25em; color: var(--text-medium); max-width: 650px; margin: 0 auto 32px auto; }
+        .hero .cta-button { font-size: 1.1em; padding: 16px 32px; }
+        .visual-placeholder { background-color: var(--border-color); border: 1px dashed var(--text-light); color: var(--text-light); padding: 60px 20px; margin-top: 40px; border-radius: 8px; max-width: 700px; margin-left: auto; margin-right: auto; font-style: italic; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px; }
+        h2 { font-size: 2.2em; font-weight: 600; color: var(--text-dark); margin-bottom: 12px; text-align: center; }
+        h3 { font-size: 1.5em; font-weight: 600; color: var(--text-dark); margin-top: 30px; margin-bottom: 8px; }
+        p { font-size: 1.05em; margin-bottom: 16px; max-width: 700px; margin-left: auto; margin-right: auto; text-align: center; }
+        .text-left { text-align: left; margin-left: 0; margin-right: 0;}
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 40px; text-align: left; }
+        .feature-item h3 { margin-top: 0; display: flex; align-items: center; }
+        .feature-item h3::before { content: '✓'; color: var(--primary-color); font-size: 1.2em; margin-right: 8px; font-weight: bold; }
+        .feature-item p { font-size: 1em; margin-left: 0; margin-right: 0; color: var(--text-medium); }
+        .how-it-works { background-color: var(--bg-light); }
+        .steps-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-top: 40px; text-align: center; }
+        .step { flex: 1; min-width: 200px; max-width: 250px; }
+        .step-number { display: inline-block; width: 40px; height: 40px; background-color: var(--primary-color); color: var(--bg-white); border-radius: 50%; font-weight: 700; line-height: 40px; margin-bottom: 15px; font-size: 1.2em; }
+        .step h3 { margin-top: 0; margin-bottom: 8px; font-size: 1.2em;}
+        .step p { font-size: 0.95em; color: var(--text-light); }
+        .cta-section { background-color: var(--text-dark); color: var(--bg-light); }
+        .cta-section h2 { color: var(--bg-white); }
+        .cta-section p { color: #D1D5DB; }
+        /* Updated form container style for better iframe fitting */
+        .form-container {
+            max-width: 640px; /* Matches iframe width */
+            margin: 30px auto 0 auto; /* Center container */
+            overflow: hidden; /* Optional: helps contain iframe */
+        }
+        .form-container iframe {
+            width: 100%; /* Make iframe fill container */
+            height: 553px; /* Use height from your embed code */
+            border: none;
+            display: block; /* Remove extra space below iframe */
+        }
+        .cta-button { display: inline-block; background-color: var(--primary-color); color: var(--bg-white) !important; padding: 14px 28px; font-size: 1.05em; font-weight: 600; text-decoration: none; border-radius: 8px; transition: background-color 0.2s ease, transform 0.1s ease; border: none; cursor: pointer; }
+        .cta-button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        footer { text-align: center; padding: 30px 20px; font-size: 0.9em; color: var(--text-light); border-top: 1px solid var(--border-color); }
+        .demo-hint { position: fixed; bottom: 85px; right: 20px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 8px 15px; border-radius: 6px; font-size: 0.9em; z-index: 999; opacity: 0; transition: opacity 0.5s ease-in-out 1s; pointer-events: none; }
+        body:hover .demo-hint { opacity: 1; }
+
+        /* --- Page Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.3em; } .hero p.subtitle { font-size: 1.1em; }
+            h2 { font-size: 1.8em; } .feature-grid { grid-template-columns: 1fr; }
+            .visual-placeholder { padding: 40px 15px; min-height: 150px;}
+             .demo-hint { font-size: 0.8em; padding: 6px 10px; bottom: 80px; right: 10px; }
+        }
+         /* --- Instaspot Widget MOBILE RESPONSIVENESS --- */
+         @media (max-width: 600px) {
+            .spotlight-modal { width: 95% !important; margin-top: 5vh !important; padding: 12px !important; max-width: none !important; }
+            .spotlight-input { font-size: 1em !important; padding: 12px 14px !important; }
+            .spotlight-results { max-height: 60vh !important; }
+            .spotlight-result-item { padding: 10px 14px !important; }
+            .spotlight-fab { width: 50px !important; height: 50px !important; font-size: 22px !important; bottom: 15px !important; right: 15px !important; }
+             .demo-hint { bottom: 70px !important; right: 15px !important; }
+             /* Adjust form container padding on mobile */
+             .form-container { max-width: 100%; }
+         }
+    </style>
+</head>
+<body>
+
+    <header id="hero-section" class="section hero">
+        <div class="container">
+            <h1>Your Website Navigation is Stuck in 2005. Fix it.</h1>
+            <p class="subtitle">Add the blazing-fast Cmd+K/Ctrl+K spotlight search users love. Embed Instaspot in minutes, no coding phd required. Stop losing visitors to confusing menus.</p>
+            <a href="#waitlist" class="cta-button">✨ Get Instaspot Early Access ✨</a>
+            <div class="visual-placeholder"
+                <strong>Psst! Try Cmd+K / Ctrl+K or the 🔍 button now!</strong>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="problem-section" class="section problem">
+            <div class="container">
+                <h2>Lost Visitors = Lost Opportunity</h2>
+                <p>Standard site search is clunky. Menus get bloated. Visitors *hate* hunting for information. If they can't find what they need in seconds, they bounce. Poof. Gone.</p>
+            </div>
+        </section>
+
+        <section id="solution-section" class="section solution">
+            <div class="container">
+                <h2>Meet Instaspot ⚡️ The Instant Search Upgrade.</h2>
+                <p>Instaspot adds a sleek, keyboard-driven command palette (Cmd+K / Ctrl+K) directly into your website. It's like giving your visitors site-wide superpowers.</p>
+            </div>
+        </section>
+
+        <section id="how-it-works-section" class="section how-it-works">
+            <div class="container">
+                 <h2>Get Started Faster Than You Can Say "Ctrl+K"</h2>
+                 <div class="steps-container">
+                     <div class="step"><span class="step-number">1</span><h3>Configure Links</h3><p>Point Instaspot to your important URLs & keywords in our dead-simple dashboard (coming soon!).</p></div>
+                     <div class="step"><span class="step-number">2</span><h3>Copy Snippet</h3><p>Grab your unique, lightweight JavaScript code. One single line.</p></div>
+                     <div class="step"><span class="step-number">3</span><h3>Paste & Launch</h3><p>Add it to your site builder (Webflow, Softr, Bubble, etc.) or HTML. Instaspot is live!</p></div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="features-section" class="section features">
+            <div class="container">
+                <h2>Not Just Search, It's a Better Experience.</h2>
+                 <div class="feature-grid">
+                     <div class="feature-item"><h3>Instant Keyboard Access</h3><p>Cmd+K (Mac) or Ctrl+K (Win) brings up search immediately. Fast, intuitive, professional.</p></div>
+                     <div class="feature-item"><h3>Effortless No-Code Setup</h3><p>If you can copy and paste, you can install Instaspot. Zero coding required on your end.</p></div>
+                     <div class="feature-item"><h3>You Control the Content</h3><p>Define exactly which pages, posts, or products are searchable and how they appear.</p></div>
+                     <div class="feature-item"><h3>Sleek & Modern UI</h3><p>A clean, minimal search interface that complements your site design, not clashes with it.</p></div>
+                     <div class="feature-item"><h3>Works Everywhere</h3><p>Designed for no-code platforms (Bubble, Webflow, Softr, etc.) and traditional websites alike.</p></div>
+                     <div class="feature-item"><h3>Lightweight & Fast</h3><p>Won't slow your site down. Provides instant results without performance drag.</p></div>
+                     <!-- !!! NEW BENEFIT ADDED BELOW !!! -->
+                     <div class="feature-item"><h3>Ideal for SaaS & Micro-SaaS</h3><p>Elevates user experience for SaaS products, whether built with no-code, low-code, or traditional code.</p></div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="waitlist" class="section cta-section">
+            <div class="container">
+                <h2>Ready for Navigation That Doesn't Suck? Get Instaspot!</h2>
+                <p>Instaspot is launching soon. Join the waitlist for priority early access, a frankly ridiculous launch discount, and the ability to tell your friends you got in early.</p>
+                <!-- FORM SECTION -->
+                <div class="form-container">
+                    <!-- !!! Google Form Embed Code Pasted Below !!! -->
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScJGEH6DE7FlI54ezeTzJ0mrjEy1lvg6oPGX4wxS7MwKEodUw/viewform?embedded=true" width="640" height="553" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                    <!-- !!! End of Google Form Embed Code !!! -->
+                </div>
+                 <p style="margin-top:20px; font-size: 0.9em;">No spam, just the good stuff about launch & your early access.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            Making the web feel faster, one Cmd+K/Ctrl+K at a time.
+            <br><strong>Try the demo! Hit Cmd+K / Ctrl+K or click the 🔍 button.</strong>
+        </div>
+    </footer>
+
+    <!-- Demo Hint Box -->
+    <div class="demo-hint">Try Cmd+K/Ctrl+K or 🔍!</div>
+
+    <!-- ============================================ -->
+    <!-- === Instaspot DEMO SCRIPT START === -->
+    <!-- ============================================ -->
+    <script>
+    (function () {
+        // --- Configuration ---
+        const fabButtonColor = "#6366F1";
+        const showFabButton = true;
+        const searchPlaceholder = "Search this page (Cmd/Ctrl+K)...";
+
+        // --- Search Data for THIS Landing Page ---
+        const hardcodedSearchData = [
+            { url: "#hero-section", name: "Top / Introduction", keywords: "hero, start, headline, top, beginning, instaspot" },
+            { url: "#problem-section", name: "The Problem We Solve", keywords: "problem, pain point, issue, navigation, lost visitors, confusing" },
+            { url: "#solution-section", name: "The Solution: Instaspot", keywords: "solution, product, answer, fix, instaspot, command palette" },
+            { url: "#how-it-works-section", name: "How It Works (Easy Steps)", keywords: "how it works, setup, steps, installation, configure, copy, paste, quick" },
+            { url: "#features-section", name: "Features & Benefits", keywords: "features, benefits, capabilities, advantages, fast, easy, keyboard, cmd+k, ctrl+k" },
+            { url: "#waitlist", name: "Join Waitlist / Sign Up", keywords: "waitlist, join, sign up, early access, form, cta, contact, pricing, discount" },
+            { url: "https://www.linkedin.com/in/saurao-dalvi/", name: "Creator (Saurao Dalvi)", keywords: "creator, author, linkedin, Saurao dalvi, developer, contact, about" }
+        ];
+
+        // --- Dynamic HTML & CSS Creation ---
+        function createWidgetHTML() {
+            const style = document.createElement("style");
+            // Base widget styles
+            style.textContent = `
+            .spotlight-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(31, 41, 55, 0.7); display: flex; align-items: flex-start; justify-content: center; z-index: 10000; visibility: hidden; opacity: 0; transition: visibility 0s linear 0.2s, opacity 0.2s ease-in-out; }
+            .spotlight-overlay.visible { visibility: visible; opacity: 1; transition: opacity 0.2s ease-in-out; }
+            .spotlight-modal { background: #2d3748; border-radius: 8px; width: 90%; max-width: 550px; margin-top: 15vh; padding: 16px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; border: 1px solid #4a5568; }
+            .spotlight-input { width: 100%; padding: 14px 16px; border: none; background: #1a202c; color: #e2e8f0; border-radius: 6px; font-size: 1.1em; outline: none; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #4a5568; }
+            .spotlight-input::placeholder { color: #718096; }
+            .spotlight-results { margin-top: 8px; max-height: 350px; overflow-y: auto; background: #2d3748; border-radius: 6px; }
+            .spotlight-results::-webkit-scrollbar { width: 8px; } .spotlight-results::-webkit-scrollbar-track { background: #1a202c; border-radius: 4px;} .spotlight-results::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px;} .spotlight-results::-webkit-scrollbar-thumb:hover { background: #718096; }
+            .spotlight-result-item { padding: 12px 16px; cursor: pointer; color: #e2e8f0; border-radius: 4px; transition: background 0.15s ease-out; border-bottom: 1px solid #4a5568; }
+             .spotlight-result-item:last-child { border-bottom: none; }
+            .spotlight-result-item:hover, .spotlight-result-item.selected { background: ${fabButtonColor}; color: white; }
+            .spotlight-fab { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; background: ${fabButtonColor}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); z-index: 9999; transition: transform 0.2s ease-out; }
+             .spotlight-fab:hover { transform: scale(1.05); }
+            `;
+            document.head.appendChild(style);
+
+            // Create HTML elements
+            const overlay = document.createElement("div");
+            overlay.classList.add("spotlight-overlay");
+            overlay.innerHTML = `<div class="spotlight-modal"><input type="text" class="spotlight-input" placeholder="${searchPlaceholder}"><div class="spotlight-results"></div></div>`;
+            document.body.appendChild(overlay);
+            if (showFabButton) {
+                const fabButton = document.createElement("div");
+                fabButton.classList.add("spotlight-fab");
+                fabButton.innerHTML = "🔍";
+                fabButton.title = "Search this page (Cmd/Ctrl+K)";
+                fabButton.addEventListener("click", (e) => { e.stopPropagation(); toggleSpotlight(); });
+                document.body.appendChild(fabButton);
+            }
+
+            // --- Event Listeners ---
+            const input = overlay.querySelector(".spotlight-input");
+            const resultsContainer = overlay.querySelector(".spotlight-results");
+            let selectedIndex = -1;
+
+            input.addEventListener("input", () => { selectedIndex = -1; performSearch(input.value, resultsContainer); });
+            input.addEventListener("keydown", (event) => {
+                const items = resultsContainer.querySelectorAll(".spotlight-result-item");
+                if (!items.length && event.key !== "Escape") return;
+                if (event.key === "Escape") { toggleSpotlight(false); }
+                else if (event.key === "ArrowDown") { event.preventDefault(); selectedIndex = (selectedIndex + 1) % items.length; updateSelection(items, selectedIndex); }
+                else if (event.key === "ArrowUp") { event.preventDefault(); selectedIndex = (selectedIndex - 1 + items.length) % items.length; updateSelection(items, selectedIndex); }
+                else if (event.key === "Enter") { event.preventDefault(); if (selectedIndex >= 0 && selectedIndex < items.length) { items[selectedIndex].click(); } else if (items.length > 0) { items[0].click(); } }
+            });
+            overlay.addEventListener("click", (event) => { if (event.target === overlay) { toggleSpotlight(false); } });
+            document.addEventListener("keydown", (event) => { if ((event.metaKey || event.ctrlKey) && event.key === "k") { event.preventDefault(); toggleSpotlight(); } });
+
+        } // End of createWidgetHTML
+
+        // --- Search Functionality ---
+        function performSearch(query, resultsContainer) {
+            resultsContainer.innerHTML = "";
+            const lowerQuery = query.trim().toLowerCase();
+            const results = hardcodedSearchData.filter(item => {
+                return !lowerQuery || item.name.toLowerCase().includes(lowerQuery) || (item.keywords && item.keywords.toLowerCase().includes(lowerQuery));
+            });
+            results.slice(0, 10).forEach((item, index) => {
+                const resultItem = document.createElement("div");
+                resultItem.classList.add("spotlight-result-item");
+                resultItem.textContent = item.name;
+                resultItem.dataset.url = item.url;
+                resultItem.addEventListener("click", () => {
+                    const isExternal = item.url.startsWith('http://') || item.url.startsWith('https://');
+                    if (isExternal) { window.open(item.url, '_blank', 'noopener noreferrer'); }
+                    else { window.location.href = item.url; }
+                    toggleSpotlight(false);
+                });
+                 resultItem.addEventListener('mouseover', () => { const allItems = resultsContainer.querySelectorAll('.spotlight-result-item'); updateSelection(allItems, index); selectedIndex = index; });
+                resultsContainer.appendChild(resultItem);
+            });
+        } // End of performSearch
+
+         // --- Update Visual Selection ---
+         function updateSelection(items, currentIndex) { items.forEach((item, index) => { if (index === currentIndex) { item.classList.add("selected"); item.scrollIntoView({ block: "nearest" }); } else { item.classList.remove("selected"); } }); }
+
+        // --- Toggle Spotlight Visibility ---
+        let isVisible = false;
+        function toggleSpotlight(forceState = null) {
+            const overlay = document.querySelector(".spotlight-overlay");
+            const resultsContainer = overlay.querySelector(".spotlight-results");
+            const shouldBeVisible = forceState !== null ? forceState : !isVisible;
+            if (shouldBeVisible) {
+                overlay.classList.add("visible");
+                const input = overlay.querySelector(".spotlight-input");
+                input.value = "";
+                performSearch("", resultsContainer);
+                setTimeout(() => input.focus(), 50);
+                isVisible = true;
+            } else {
+                overlay.classList.remove("visible");
+                isVisible = false;
+            }
+        } // End of toggleSpotlight
+
+        // --- Initialize ---
+        if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", createWidgetHTML); }
+        else { createWidgetHTML(); }
+
+    })();
+    </script>
+    <!-- ============================================ -->
+    <!-- === Instaspot DEMO SCRIPT END === -->
+    <!-- ============================================ -->
+
+</body>
+</html>
